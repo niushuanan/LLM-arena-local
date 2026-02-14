@@ -1,10 +1,14 @@
 <template>
   <div class="app">
     <header>
-      <div class="title">思辨场</div>
+      <div class="title">Model Judge</div>
       <div class="header-actions">
-        <button class="btn-ghost" @click="openFavoritesModal">收藏</button>
-        <button class="btn-ghost" @click="openKeysModal">密钥</button>
+        <select v-model="language" class="lang-select" @change="saveLanguage">
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+        </select>
+        <button class="btn-ghost" @click="openFavoritesModal">{{ t.favorites }}</button>
+        <button class="btn-ghost" @click="openKeysModal">{{ t.keys }}</button>
       </div>
     </header>
 
@@ -12,15 +16,15 @@
     <div id="keysModal" class="modal-overlay" :class="{ active: showKeysModal }" @click.self="closeKeysModal">
       <div class="modal">
         <div class="modal-head">
-          <div class="modal-title">API 密钥设置</div>
+          <div class="modal-title">{{ t.apiKeyTitle }}</div>
           <button class="modal-close" @click="closeKeysModal">&times;</button>
         </div>
         <div class="key-form">
-          <label>OpenRouter API Key</label>
-          <input type="password" v-model="apiKeyInput" placeholder="请输入 OpenRouter API Key">
+          <label>{{ t.apiKeyLabel }}</label>
+          <input type="password" v-model="apiKeyInput" :placeholder="t.apiKeyPlaceholder">
           <div class="btn-row">
-            <button @click="saveKey">保存</button>
-            <button class="btn-ghost" @click="deleteKey">删除</button>
+            <button @click="saveKey">{{ t.save }}</button>
+            <button class="btn-ghost" @click="deleteKey">{{ t.delete }}</button>
           </div>
           <div class="key-msg" :class="keyMsgClass">{{ keyMsg }}</div>
         </div>
@@ -31,7 +35,7 @@
     <div id="favoritesModal" class="modal-overlay" :class="{ active: showFavoritesModal }" @click.self="closeFavoritesModal">
       <div class="modal favorites-modal">
         <div class="modal-head">
-          <div class="modal-title">我的收藏</div>
+          <div class="modal-title">{{ t.myFavorites }}</div>
           <button class="modal-close" @click="closeFavoritesModal">&times;</button>
         </div>
         <div class="favorites-list" v-if="state.favorites.length > 0">
@@ -42,51 +46,51 @@
               <span>{{ formatTime(fav.createdAt) }}</span>
             </div>
             <div class="favorite-actions">
-              <button class="btn-ghost" @click="viewFavorite(fav)">查看</button>
-              <button class="btn-ghost" @click="deleteFavorite(fav.id)">删除</button>
+              <button class="btn-ghost" @click="viewFavorite(fav)">{{ t.view }}</button>
+              <button class="btn-ghost" @click="deleteFavorite(fav.id)">{{ t.delete }}</button>
             </div>
           </div>
         </div>
-        <div v-else class="favorites-empty">暂无收藏</div>
+        <div v-else class="favorites-empty">{{ t.noFavorites }}</div>
       </div>
     </div>
 
     <!-- Prompt 输入 -->
     <section class="panel">
       <div class="section-head">
-        <h2>Prompt</h2>
+        <h2>{{ t.prompt }}</h2>
         <div class="actions">
-          <button @click="runQuery" :disabled="state.running">提交</button>
-          <button class="btn-ghost" @click="setExample">示例</button>
-          <button class="btn-ghost" @click="clearResponses">清空</button>
+          <button @click="runQuery" :disabled="state.running">{{ t.submit }}</button>
+          <button class="btn-ghost" @click="setExample">{{ t.example }}</button>
+          <button class="btn-ghost" @click="clearResponses">{{ t.clear }}</button>
         </div>
       </div>
       <textarea 
         id="questionInput" 
         v-model="question" 
-        placeholder="例如：写一篇 600 字左右的科幻短篇小说，包含一个意外转折，风格冷峻。"
+        :placeholder="t.placeholder"
         @keydown.enter.meta="runQuery"
         @keydown.enter.ctrl="runQuery"
       ></textarea>
       <div class="prompt-footer">
         <label class="file-upload">
           <input type="file" ref="fileInput" @change="handleFileUpload" accept=".txt,.md,.pdf,.docx,.png,.jpg,.jpeg,.gif,.webp" style="display:none">
-          <span class="file-btn">📎 上传文件</span>
+          <span class="file-btn">📎 {{ t.fileUpload }}</span>
         </label>
         <span class="file-name" v-if="uploadedFile">{{ uploadedFile.name }}</span>
-        <span class="mono">回车换行，Command+回车发送</span>
+        <span class="mono">{{ t.hint }}</span>
       </div>
     </section>
 
     <!-- 模型选择 -->
     <section class="panel">
       <div class="section-head">
-        <h2>模型</h2>
-        <button class="btn-ghost" @click="toggleSelectAll">全选/全不选</button>
+        <h2>{{ t.model }}</h2>
+        <button class="btn-ghost" @click="toggleSelectAll">{{ t.selectAll }}</button>
       </div>
       <div class="model-filter">
         <button 
-          v-for="filter in ['全部', '中国', '美国']" 
+          v-for="filter in [t.all, t.china, t.usa]" 
           :key="filter"
           class="filter-btn"
           :class="{ active: modelFilter === filter }"
@@ -106,10 +110,10 @@
     <!-- 回答展示 -->
     <section class="panel">
       <div class="section-head">
-        <h2>回答</h2>
+        <h2>{{ t.answer }}</h2>
         <div class="actions">
-          <button class="btn-ghost" id="genSummaryBtn" style="display:none;" @click="generateSummary">生成差异总结</button>
-          <button class="btn-ghost" id="genFusionBtn" style="display:none;" @click="generateFusion">生成最佳融合</button>
+          <button class="btn-ghost" id="genSummaryBtn" style="display:none;" @click="generateSummary">{{ t.genSummary }}</button>
+          <button class="btn-ghost" id="genFusionBtn" style="display:none;" @click="generateFusion">{{ t.genFusion }}</button>
         </div>
       </div>
       <div class="mono" id="runMeta">{{ runMeta }}</div>
@@ -122,12 +126,12 @@
               <button class="order-btn" @click="moveCard(card.key, 1)">→</button>
               <button class="star-btn" :class="{ starred: card.starred }" @click="toggleStar(card)">{{ card.starred ? '★' : '☆' }}</button>
               <button class="copy-btn" :class="{ copied: card.copied }" v-if="card.content !== undefined" @click="copyContent(card)">{{ card.copied ? '已复制' : '复制' }}</button>
-              <div class="status" :class="card.error ? 'err' : ''" v-if="card.status">{{ card.status }}</div>
+              <div class="status" :class="card.error ? 'err' : ''" v-if="card.status === 'failed'">{{ t.failed }}</div>
             </div>
           </div>
           <div class="resp-meta">{{ card.meta }}</div>
-          <div class="resp-body" v-if="card.status === '请求中'">
-            <span class="loading-text">正在请求 {{ card.name }}...</span>
+          <div class="resp-body" v-if="card.status === 'requesting'">
+            <span class="loading-text">{{ card.name }}...</span>
           </div>
           <div class="resp-body streaming" v-else-if="card.status === '' && card.content" v-html="escapeHtml(card.content) + '<span class=\'streaming-cursor\'>▊</span>'"></div>
           <div class="resp-body" v-else v-html="escapeHtml(card.content)"></div>
@@ -135,13 +139,13 @@
       </div>
       <div id="summaryPanel" class="summary-panel" v-if="showSummary">
         <div class="summary-card">
-          <div class="summary-title">差异总结</div>
+          <div class="summary-title">{{ t.summaryTitle }}</div>
           <div class="resp-body" v-html="escapeHtml(summaryContent)"></div>
         </div>
         <div class="summary-card">
           <div class="summary-head">
-            <div class="summary-title">最佳答案融合</div>
-            <button class="btn-ghost mini-btn" @click="regenerateFusion">重新生成</button>
+            <div class="summary-title">{{ t.fusionTitle }}</div>
+            <button class="btn-ghost mini-btn" @click="regenerateFusion">{{ t.regenFusion }}</button>
           </div>
           <div class="resp-body" v-html="escapeHtml(fusionContent)"></div>
         </div>
@@ -151,14 +155,14 @@
     <!-- 历史记录 -->
     <section class="panel">
       <div class="section-head">
-        <h2>记录</h2>
+        <h2>{{ t.record }}</h2>
         <div class="search-row">
-          <input type="search" v-model="searchKeyword" placeholder="搜索" @input="filterHistory">
+          <input type="search" v-model="searchKeyword" :placeholder="t.search" @input="filterHistory">
           <button class="btn-ghost" @click="clearHistory">Clear</button>
         </div>
       </div>
       <div class="history-list" id="historyList">
-        <div v-if="filteredHistory.length === 0" class="history-empty">暂无</div>
+        <div v-if="filteredHistory.length === 0" class="history-empty">{{ t.noHistory }}</div>
         <div v-else v-for="item in filteredHistory" :key="item.id" class="history-item" @click="loadRecord(item)">
           <div class="history-top">
             <div class="time">{{ formatTime(item.createdAt) }}</div>
@@ -170,16 +174,16 @@
       </div>
 
       <details class="secondary">
-        <summary>存储与背景</summary>
+        <summary>{{ t.storage }}</summary>
         <div class="file-row">
           <span class="mono">{{ fileStatus }}</span>
-          <button class="btn-ghost" @click="bindFile">绑定</button>
-          <button class="btn-ghost" @click="exportOnce">导出</button>
+          <button class="btn-ghost" @click="bindFile">{{ t.bind }}</button>
+          <button class="btn-ghost" @click="exportOnce">{{ t.export }}</button>
         </div>
         <div class="file-row">
           <span class="mono">{{ bgStatus }}</span>
-          <button class="btn-ghost" @click="triggerBgInput">设置背景</button>
-          <button class="btn-ghost" @click="clearBackground">清除背景</button>
+          <button class="btn-ghost" @click="triggerBgInput">{{ t.bgSet }}</button>
+          <button class="btn-ghost" @click="clearBackground">{{ t.bgClear }}</button>
           <input type="file" ref="bgInput" accept="image/*" style="display:none" @change="handleBgChange">
         </div>
       </details>
@@ -188,23 +192,23 @@
     <!-- 模型排行榜 -->
     <section class="panel rank-panel">
       <div class="rank-head">
-        <div class="rank-title">模型排行榜</div>
-        <div class="rank-sub">多维度排名，点击表头可切换正序/倒序</div>
+        <div class="rank-title">{{ t.rankTitle }}</div>
+        <div class="rank-sub">{{ t.rankSub }}</div>
       </div>
       <div class="stats-table-container">
         <table class="stats-table" id="statsTable">
           <thead>
             <tr>
-              <th data-sort="model" @click="setSort('model')">模型</th>
-              <th data-sort="speed" @click="setSort('speed')" :class="sortClass('speed')">平均响应时间</th>
-              <th data-sort="cost" @click="setSort('cost')" :class="sortClass('cost')">平均费用</th>
-              <th data-sort="ability" @click="setSort('ability')" :class="sortClass('ability')">AI 评测得分</th>
-              <th data-sort="overall" @click="setSort('overall')" :class="sortClass('overall')">综合排名</th>
+              <th data-sort="model" @click="setSort('model')">{{ t.model }}</th>
+              <th data-sort="speed" @click="setSort('speed')" :class="sortClass('speed')">{{ t.avgTime }}</th>
+              <th data-sort="cost" @click="setSort('cost')" :class="sortClass('cost')">{{ t.avgCost }}</th>
+              <th data-sort="ability" @click="setSort('ability')" :class="sortClass('ability')">{{ t.ability }}</th>
+              <th data-sort="overall" @click="setSort('overall')" :class="sortClass('overall')">{{ t.overall }}</th>
             </tr>
           </thead>
           <tbody id="statsTableBody">
             <tr v-if="modelStats.length === 0">
-              <td colspan="5" class="stats-empty">暂无问答记录，开始提问后将自动统计</td>
+              <td colspan="5" class="stats-empty">{{ t.noStats }}</td>
             </tr>
             <tr v-else v-for="stat in sortedStats" :key="stat.key">
               <td class="model-name-cell">{{ stat.name }}</td>
@@ -217,8 +221,8 @@
         </table>
       </div>
       <div class="rank-footer">
-        AI 评测得分数据来源：Artificial Analysis<br>
-        综合排名 = (速度排名 + 费用排名 + AI 评测排名) / 3
+        {{ t.rankFooter1 }}<br>
+        {{ t.rankFooter2 }}
       </div>
     </section>
   </div>
@@ -231,7 +235,7 @@ export default {
     return {
       question: '',
       selectedModels: [],
-      modelFilter: '全部',
+      modelFilter: 'all',
       state: {
         history: [],
         favorites: [],
@@ -239,7 +243,7 @@ export default {
         currentRecord: null
       },
       responseCards: [],
-      runMeta: '等待',
+      runMeta: '',
       showKeysModal: false,
       showFavoritesModal: false,
       apiKeyInput: '',
@@ -255,10 +259,144 @@ export default {
       sortOrder: 'asc',
       fileHandle: null,
       bgImage: null,
-      uploadedFile: null
+      uploadedFile: null,
+      language: 'zh'
     }
   },
   computed: {
+    t() {
+      return this.language === 'zh' ? {
+        keys: '密钥',
+        favorites: '收藏',
+        apiKeyTitle: 'API 密钥设置',
+        apiKeyLabel: 'OpenRouter API Key',
+        apiKeyPlaceholder: '请输入 OpenRouter API Key',
+        save: '保存',
+        delete: '删除',
+        myFavorites: '我的收藏',
+        noFavorites: '暂无收藏',
+        view: '查看',
+        prompt: 'Prompt',
+        submit: '提交',
+        example: '示例',
+        clear: '清空',
+        placeholder: '例如：写一篇 600 字左右的科幻短篇小说，包含一个意外转折，风格冷峻。',
+        hint: '回车换行，Command+回车发送',
+        model: '模型',
+        selectAll: '全选/全不选',
+        all: '全部',
+        china: '中国',
+        usa: '美国',
+        answer: '回答',
+        genSummary: '生成差异总结',
+        genFusion: '生成最佳融合',
+        record: '记录',
+        search: '搜索',
+        storage: '存储与背景',
+        bind: '绑定',
+        export: '导出',
+        bgSet: '设置背景',
+        bgClear: '清除背景',
+        bgDefault: '背景：默认',
+        bgSet_: '背景：已设置',
+        rankTitle: '模型排行榜',
+        rankSub: '多维度排名，点击表头可切换正序/倒序',
+        avgTime: '平均响应时间',
+        avgCost: '平均费用',
+        ability: 'AI 评测得分',
+        overall: '综合排名',
+        noStats: '暂无问答记录，开始提问后将自动统计',
+        rankFooter1: 'AI 评测得分数据来源：Artificial Analysis',
+        rankFooter2: '综合排名 = (速度排名 + 费用排名 + AI 评测排名) / 3',
+        waiting: '等待',
+        requesting: '请求中',
+        failed: '失败',
+        copy: '复制',
+        copied: '已复制',
+        summaryTitle: '差异总结',
+        fusionTitle: '最佳答案融合',
+        regenerate: '重新生成',
+        generating: '生成中...',
+        fileUpload: '上传文件',
+        noHistory: '暂无',
+        clearConfirm: '确认清空所有本地记录？',
+        selectModel: '请至少选择一个模型',
+        deleteKeyConfirm: '确定删除本地保存的 API Key 吗？',
+        keySaved: '已保存到本地文件 api_key.txt',
+        keyDeleted: '已删除',
+        keyError: '请输入 API Key',
+        netError: '网络错误',
+        empty: '-',
+        fileBind: '文件：未绑定',
+        fileBrowser: '文件：浏览器不支持',
+        regenFusion: '重新生成'
+      } : {
+        keys: 'Keys',
+        favorites: 'Favorites',
+        apiKeyTitle: 'API Key Settings',
+        apiKeyLabel: 'OpenRouter API Key',
+        apiKeyPlaceholder: 'Enter your OpenRouter API Key',
+        save: 'Save',
+        delete: 'Delete',
+        myFavorites: 'My Favorites',
+        noFavorites: 'No favorites yet',
+        view: 'View',
+        prompt: 'Prompt',
+        submit: 'Submit',
+        example: 'Example',
+        clear: 'Clear',
+        placeholder: 'E.g., Write a 600-word sci-fi short story with a twist, cold tone.',
+        hint: 'Enter for new line, Cmd+Enter to send',
+        model: 'Models',
+        selectAll: 'Select All',
+        all: 'All',
+        china: 'China',
+        usa: 'US',
+        answer: 'Answer',
+        genSummary: 'Generate Summary',
+        genFusion: 'Generate Fusion',
+        record: 'History',
+        search: 'Search',
+        storage: 'Storage & Background',
+        bind: 'Bind',
+        export: 'Export',
+        bgSet: 'Set BG',
+        bgClear: 'Clear BG',
+        bgDefault: 'Background: Default',
+        bgSet_: 'Background: Set',
+        rankTitle: 'Model Leaderboard',
+        rankSub: 'Multi-dimensional ranking, click header to toggle',
+        avgTime: 'Avg Response Time',
+        avgCost: 'Avg Cost',
+        ability: 'AI Benchmark',
+        overall: 'Overall Rank',
+        noStats: 'No records yet. Start querying to see stats.',
+        rankFooter1: 'AI Benchmark score from Artificial Analysis',
+        rankFooter2: 'Overall = (Speed + Cost + AI Benchmark) / 3',
+        waiting: 'Waiting',
+        requesting: 'Requesting',
+        failed: 'Failed',
+        copy: 'Copy',
+        copied: 'Copied',
+        summaryTitle: 'Summary',
+        fusionTitle: 'Best Answer Fusion',
+        regenerate: 'Regenerate',
+        generating: 'Generating...',
+        fileUpload: 'Upload File',
+        noHistory: 'No records',
+        clearConfirm: 'Clear all local records?',
+        selectModel: 'Please select at least one model',
+        deleteKeyConfirm: 'Delete saved API Key?',
+        keySaved: 'Saved to api_key.txt',
+        keyDeleted: 'Deleted',
+        keyError: 'Please enter API Key',
+        netError: 'Network error',
+        empty: '-',
+        fileBind: 'File: Not bound',
+        fileBrowser: 'File: Not supported',
+        regenFusion: 'Regenerate'
+      }
+    },
     CONFIG() {
       return {
         timeoutMs: 90000,
@@ -294,13 +432,19 @@ export default {
     FILE_DB() { return 'multiqa_file_db' },
     FILE_STORE() { return 'handles' },
     BG_KEY() { return 'multiqa_background_v1' },
+    LANG_KEY() { return 'multiqa_language_v1' },
     COMPETITION_REMINDER() {
+      if (this.language === 'en') {
+        return '[System] You are participating in an AI capability assessment. Provide the most suitable and precise answer based on the question type - be concise for simple questions, thorough for complex ones. IMPORTANT: You MUST respond in the SAME language as the user\'s question.\n\nUser question: '
+      }
       return '【系统提示】你正在参加一场大模型能力评估。请根据问题的性质，提供最适合、最精准的回答——简洁问题时言简意赅，复杂问题时深入详尽。你的表现将被评估和比较。\n\n用户问题：'
     },
     filteredModels() {
       const entries = Object.entries(this.CONFIG.models)
-      if (this.modelFilter === '全部') return entries.map(([key, val]) => ({ key, ...val }))
-      return entries.filter(([, val]) => val.region === this.modelFilter).map(([key, val]) => ({ key, ...val }))
+      if (this.modelFilter === 'all') return entries.map(([key, val]) => ({ key, ...val }))
+      const regionMap = { china: '中国', usa: '美国' }
+      const region = regionMap[this.modelFilter] || this.modelFilter
+      return entries.filter(([, val]) => val.region === region).map(([key, val]) => ({ key, ...val }))
     },
     filteredHistory() {
       if (!this.searchKeyword) return this.state.history
@@ -388,8 +532,16 @@ export default {
     this.loadFavorites()
     this.loadBg()
     this.loadFileHandle()
+    this.loadLanguage()
   },
   methods: {
+    loadLanguage() {
+      const saved = localStorage.getItem(this.LANG_KEY)
+      if (saved) this.language = saved
+    },
+    saveLanguage() {
+      localStorage.setItem(this.LANG_KEY, this.language)
+    },
     escapeHtml(text) {
       if (!text) return ''
       return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -428,7 +580,7 @@ export default {
     clearResponses() {
       this.responseCards = []
       this.showSummary = false
-      this.runMeta = '等待'
+      this.runMeta = this.t.waiting
       this.state.currentRecord = null
     },
     async loadHistory() {
@@ -470,9 +622,9 @@ export default {
           key: resp.modelKey,
           name: cfg.name,
           color: cfg.color,
-          content: this.sanitizeText(resp.error || resp.content || '(空响应)'),
+          content: this.sanitizeText(resp.error || resp.content || (this.language === 'zh' ? '(空响应)' : '(Empty response)')),
           meta: meta,
-          status: resp.error ? '失败' : '',
+          status: resp.error ? 'failed' : '',
           error: !!resp.error,
           copied: false,
           starred: resp.starred || false
@@ -630,14 +782,14 @@ export default {
       })
       
       this.state.running = true
-      this.runMeta = `执行中 | ${sorted.length} 个模型`
+      this.runMeta = `${sorted.length} ${this.language === 'zh' ? '个模型' : 'models'} ${this.t.requesting}`
       this.responseCards = sorted.map(key => ({
         key,
         name: this.CONFIG.models[key].name,
         color: this.CONFIG.models[key].color,
         content: '',
         meta: this.CONFIG.models[key].name,
-        status: '请求中',
+        status: 'requesting',
         error: false,
         starred: false
       }))
@@ -668,9 +820,11 @@ export default {
         
         if (card) {
           card.meta = meta
-          card.status = result.ok ? '' : '失败'
+          card.status = result.ok ? '' : 'failed'
           card.error = !result.ok
-          card.content = result.ok ? this.sanitizeText(result.content || '(空响应)') : this.sanitizeText(result.error || '请求失败')
+          const emptyText = this.language === 'zh' ? '(空响应)' : '(Empty response)'
+          const errorText = this.language === 'zh' ? '请求失败' : 'Request failed'
+          card.content = result.ok ? this.sanitizeText(result.content || emptyText) : this.sanitizeText(result.error || errorText)
         }
         
         return {
@@ -711,7 +865,7 @@ export default {
       this.state.history.unshift(record)
       this.saveHistory()
       this.state.currentRecord = record
-      this.runMeta = `${sorted.length} 个模型 | ${new Date(record.createdAt).toLocaleString()}`
+      this.runMeta = `${sorted.length} ${this.language === 'zh' ? '个模型' : 'models'} | ${new Date(record.createdAt).toLocaleString()}`
       this.state.running = false
       this.uploadedFile = null
       if (this.$refs.fileInput) this.$refs.fileInput.value = ''
@@ -1048,7 +1202,19 @@ header {
   width: 100%;
 }
 
-.header-actions { display: flex; gap: 8px; }
+.header-actions { display: flex; gap: 8px; align-items: center; }
+
+.lang-select {
+  padding: 4px 8px;
+  border: 1px solid #cfcfcf;
+  background: #fff;
+  font-size: 12px;
+  font-family: var(--sans);
+  cursor: pointer;
+  outline: none;
+}
+
+.lang-select:focus { border-color: #888; }
 
 .title {
   font-size: clamp(22px, 2.8vw, 32px);
