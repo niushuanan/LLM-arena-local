@@ -1,7 +1,0 @@
-window.__LOCAL_KEYS__ = {
-  openai: "",
-  anthropic: "",
-  xai: "",
-  gemini: "",
-  minimax: ""
-};

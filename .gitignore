@@ -6,3 +6,8 @@ __pycache__/
 api_key.txt
 oh-my-opencode/
 .opencode/
+node_modules/
+dist/
+gateway.log
+index_backup.html
+*.log

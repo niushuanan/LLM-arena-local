@@ -16,6 +16,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 BASE_DIR = Path(__file__).resolve().parent
 INDEX_FILE = BASE_DIR / "index.html"
 API_KEY_FILE = BASE_DIR / "api_key.txt"
+DIST_DIR = BASE_DIR / "dist"
 
 # OpenRouter 配置
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -202,10 +203,24 @@ def format_sse(delta: str, usage: Any = None) -> str:
 # ==================== API 路由 ====================
 @app.get("/")
 async def index() -> FileResponse:
-    """主页"""
+    """主页 - 优先使用 Vue 构建的文件"""
+    # 优先使用 Vue 构建的 dist/index.html
+    dist_index = DIST_DIR / "index.html"
+    if dist_index.exists():
+        return FileResponse(dist_index)
+    # 降级使用原始 index.html
     if not INDEX_FILE.exists():
         raise HTTPException(status_code=404, detail="index.html 不存在")
     return FileResponse(INDEX_FILE)
+
+
+@app.get("/assets/{file_path:path}")
+async def static_assets(file_path: str):
+    """服务 Vue 构建的静态资源"""
+    asset_file = DIST_DIR / "assets" / file_path
+    if asset_file.exists():
+        return FileResponse(asset_file)
+    raise HTTPException(status_code=404, detail="资源不存在")
 
 
 @app.get("/api/key")
