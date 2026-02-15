@@ -143,8 +143,8 @@ npm run build
 - 复制回答功能
 
 ### v0.1.1
-- v0.4.2: 模型选择区顺序优化（MiniMax/GLM 靠右显示）
-- v0.4.0: Qwen 与 DeepSeek 改为网关调用
+- 模型选择区顺序优化（MiniMax/GLM 靠右显示）
+- Qwen 与 DeepSeek 改为网关调用
 
 ### v0.1.0
 - 初始版本：多模型并发问答对比工具
