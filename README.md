@@ -18,6 +18,8 @@
 
 ## 支持的 AI 模型
 
+## 支持的 AI 模型
+
 支持 OpenRouter 上的所有模型，包括 GPT、Claude、Gemini、Grok 等国际模型，以及 Kimi、GLM、Qwen、DeepSeek、MiniMax 等国产模型。可在设置中自由选择要对比的模型。
 
 ---
