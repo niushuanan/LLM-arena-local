@@ -1,150 +1,152 @@
-# Multi-Model QA Arena
+# 思辨场 - 多模型问答对比工具
 
-A local multi-model Q&A comparison tool. Ask multiple AIs the same question and compare their answers in real-time.
+[English](./README.md)
 
-## Features
+一个可本地运行的多模型并发问答工具。你可以同时向多个 AI 提问，对比它们的回答质量。
 
-- **Multi-Model Query**: Ask one question, get responses from 9 AI models simultaneously
-- **Real-time Streaming**: Watch answers appear as they're generated
-- **Cost Transparency**: See token usage and cost for each response
-- **Smart Ranking**: Auto-calculate model rankings based on speed, cost, and capability
-- **History**: All Q&A saved locally for review
-- **Favorites**: Save important Q&A pairs for later
-- **File Upload**: Support uploading images, PDFs, TXT files
-- **Color-Coded Cards**: Each model has a unique border color for easy identification
-- **Local Deployment**: All data stays on your machine for privacy
+## 功能特点
 
-## Supported AI Models
+- **一键多问**：一次提问，同时获得 9 个 AI 的回答
+- **实时对比**：流式输出，边回答边看
+- **费用透明**：每次回答显示消耗的 Token 和费用
+- **智能排行**：自动统计各模型的响应速度、费用、能力指数
+- **历史记录**：所有问答自动保存，随时回顾
+- **收藏功能**：收藏重要问答，随时查看
+- **文件上传**：支持上传图片、PDF、TXT 等文件
+- **卡片标识**：不同模型用不同颜色区分
+- **本地部署**：数据存在自己电脑，隐私安全
 
-| Model | Region | Color |
-|-------|--------|-------|
-| GPT-5.2 | US | Green |
-| Claude Opus 4.5 | US | Blue |
-| Grok 4 | US | Orange |
-| Gemini 3 Pro Preview | US | Purple |
-| Kimi K2.5 | China | Pink |
-| GLM-5 | China | Red |
-| MiniMax M2.5 | China | Cyan |
-| Qwen3 Max Thinking | China | Lime |
-| DeepSeek V3.2 | China | Indigo |
+## 支持的 AI 模型
+
+| 模型 | 地区 | 颜色 |
+|------|------|------|
+| GPT-5.2 | 美国 | 绿色 |
+| Claude Opus 4.5 | 美国 | 蓝色 |
+| Grok 4 | 美国 | 橙色 |
+| Gemini 3 Pro Preview | 美国 | 紫色 |
+| Kimi K2.5 | 中国 | 粉色 |
+| GLM-5 | 中国 | 红色 |
+| MiniMax M2.5 | 中国 | 青色 |
+| Qwen3 Max Thinking | 中国 | 绿色 |
+| DeepSeek V3.2 | 中国 | 靛蓝 |
 
 ---
 
-## Quick Start
+## 快速开始
 
-### Prerequisites
+### 准备工作
 
 - Python 3.8+
-- Node.js 18+ (for frontend)
-- OpenRouter API Key
+- Node.js 18+（用于前端）
+- OpenRouter API 密钥
 
-### Get Your OpenRouter API Key
+### 获取 OpenRouter API 密钥
 
-1. Visit https://openrouter.ai/
-2. Sign up/Login
-3. Click "Keys" → "Create Key"
-4. Copy your API key (starts with `sk-or-v1-`)
+1. 访问 https://openrouter.ai/
+2. 注册/登录
+3. 点击 "Keys" → "Create Key"
+4. 复制你的 API 密钥（以 `sk-or-v1-` 开头）
 
-> Note: New users need to add funds (minimum $5) before use.
+> 注意：新用户需要充值（最低 $5）后才能使用。
 
-### Installation
+### 安装
 
 ```bash
-# Clone the repo
+# 克隆仓库
 git clone https://github.com/niushuanan/Multi-Model-QA-Arena.git
 cd Multi-Model-QA-Arena
 
-# Install Python dependencies
+# 安装 Python 依赖
 pip install -r requirements.txt
 
-# Install Node dependencies
+# 安装 Node 依赖
 npm install
 ```
 
-### Run
+### 运行
 
 ```bash
-# Terminal 1: Start backend
+# 终端 1：启动后端
 python3 gateway.py
 
-# Terminal 2: Build frontend
+# 终端 2：构建前端
 npm run build
 ```
 
-Open http://127.0.0.1:8787 in your browser.
+在浏览器中打开 http://127.0.0.1:8787
 
-### First Time Setup
+### 首次设置
 
-1. **Add API Key**:
-   - Click "密钥" (Keys) button in top right
-   - Paste your OpenRouter API key
-   - Click "保存" (Save)
+1. **添加 API 密钥**：
+   - 点击右上角的"密钥"按钮
+   - 粘贴你的 OpenRouter API 密钥
+   - 点击"保存"
 
-2. **Select Models**: Check the models you want to compare
+2. **选择模型**：勾选你想要对比的模型
 
-3. **Ask a Question**:
-   - Type your question in the input box
-   - Press Command+Enter or click "提交" (Submit)
-   - Optionally upload files (images, PDF, TXT)
+3. **提问**：
+   - 在输入框中输入问题
+   - 按 Command+Enter 或点击"提交"按钮
+   - 可选择上传文件（图片、PDF、TXT）
 
-4. **Compare Results**: Wait for all AI responses and compare
-
----
-
-## Ranking Explanation
-
-The bottom of the page shows multi-dimensional rankings:
-
-| Metric | Description |
-|--------|-------------|
-| Avg Response Time | Average ms to respond, lower is better |
-| Avg Cost | Average cost per response, lower is better |
-| AI Benchmark Score | Capability score from Artificial Analysis, higher is better |
-| Overall Rank | (Speed Rank + Cost Rank + AI Benchmark Rank) / 3, lower is better |
+4. **对比结果**：等待所有 AI 回答完成后进行对比
 
 ---
 
-## Data Storage
+## 排行说明
 
-- **Q&A History**: Browser localStorage (lost if switching browsers)
-- **Favorites**: Browser localStorage
-- **API Key**: Stored in `api_key.txt` locally
-- **Backup**: Use "导出" button to export all records
+页面底部显示多维度排行：
 
----
-
-## Security
-
-- API key stored locally, never sent to external servers
-- `api_key.txt` is in .gitignore, never committed to Git
-- All data stays on your machine
+| 指标 | 说明 |
+|------|------|
+| 平均响应时间 | 响应平均耗时（毫秒），越低越好 |
+| 平均费用 | 每次回答平均费用，越低越好 |
+| AI 基准分 | 来自 Artificial Analysis 的能力评分，越高越好 |
+| 综合排行 | (速度排行 + 费用排行 + AI 基准排行) / 3，越低越好 |
 
 ---
 
-## Tech Stack
+## 数据存储
 
-- Frontend: Vue 3 + Vite
-- Backend: Python FastAPI
-- API: OpenRouter
+- **问答历史**：浏览器 localStorage（切换浏览器会丢失）
+- **收藏夹**：浏览器 localStorage
+- **API 密钥**：本地 `api_key.txt` 文件存储
+- **备份**：使用"导出"按钮导出所有记录
 
 ---
 
-## Version History
+## 安全说明
+
+- API 密钥保存在本地，不会发送到外部服务器
+- `api_key.txt` 已在 .gitignore，不会提交到 Git
+- 所有数据都保存在你的电脑上
+
+---
+
+## 技术栈
+
+- 前端：Vue 3 + Vite
+- 后端：Python FastAPI
+- API：OpenRouter
+
+---
+
+## 版本历史
 
 ### v0.8.0 (2026-02)
-- Migrated to Vue 3
-- Added color-coded model cards
-- Added favorites feature
-- Added file upload support
-- Improved streaming animation
+- 迁移到 Vue 3
+- 添加颜色区分的模型卡片
+- 添加收藏功能
+- 添加文件上传支持
+- 优化流式动画效果
 
 ### v0.7.0 (2025-02)
-- Added multi-dimensional ranking
-- Real-time response time, token, and cost display
-- Local API key storage
+- 添加多维度排行
+- 实时显示响应时间、Token 和费用
+- 本地 API 密钥存储
 
 ---
 
-## License
+## 许可证
 
 MIT
